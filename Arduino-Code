@@ -1,0 +1,37 @@
+#include <SPI.h>
+#include <MFRC522.h>
+
+const int pinRST=9;
+const int pinSDA=10;
+MFRC522 mfrc522(pinSDA,pinRST);
+
+const int RedLED=8; //Red LED is connected to pin 8 on the Arduino
+const int GreenLED=7; // Green LED is connected to pin 7 on the Arduino
+const byte AllowedTag_firstbit=169; // first bit of the ID of the "allowed" tag
+
+void setup() {
+  SPI.begin();
+  mfrc522.PCD_Init();
+  Serial.begin(9600);
+  pinMode(RedLED,OUTPUT);
+  pinMode(GreenLED, OUTPUT);
+}
+
+void loop() {
+  byte index=0;
+    if (mfrc522.PICC_IsNewCardPresent()){//Is true if there is a new card/tag detected
+      if (mfrc522.PICC_ReadCardSerial()){// Is true if the it can read the ID of the new card/tag
+        if (mfrc522.uid.uidByte[index]==AllowedTag_firstbit){
+          digitalWrite(GreenLED,HIGH);
+          delay(5000);
+          digitalWrite(GreenLED,LOW);// If the "allowed" tag is shown to the sensor, light up the Green LED.
+        }
+        else{
+          digitalWrite(RedLED,HIGH);
+          delay(5000);
+          digitalWrite(RedLED,LOW);// If any other tag us shown to the sensor, light up the Red LED.
+        }
+      }
+    }
+
+}
